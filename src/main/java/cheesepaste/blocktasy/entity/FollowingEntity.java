@@ -1,5 +1,6 @@
 package cheesepaste.blocktasy.entity;
 
+import cheesepaste.blocktasy.ability.BlockAbility;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -80,6 +81,8 @@ public class FollowingEntity extends BaseBlockEntity {
     private Vec3d targetControlPos; // 控制目标位置
     private boolean justLaunched = false; // 刚刚被发射
     private int launchCooldown = 0; // 发射冷却
+
+    public BlockAbility ability;
 
     // ================= 构造方法 =================
 

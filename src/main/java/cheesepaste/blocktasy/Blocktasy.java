@@ -1,6 +1,7 @@
 package cheesepaste.blocktasy;
 
 
+import cheesepaste.blocktasy.ability.BlockAbility;
 import cheesepaste.blocktasy.component.ModComponents;
 import cheesepaste.blocktasy.config.ModConfig;
 import cheesepaste.blocktasy.entity.BaseBlockEntity;
@@ -32,10 +33,7 @@ import net.minecraft.util.math.Vec3d;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 public class Blocktasy implements ModInitializer {
 	public static final String MOD_ID = "puzzle-rain";
@@ -44,6 +42,7 @@ public class Blocktasy implements ModInitializer {
 
 	// 添加静态实例
 	private static Blocktasy instance;
+	public static Map<BlockState, BlockAbility> abilityMap=new HashMap<>();
 
 	public static ModConfig config;
 	/*private final AnimationTaskManager animationTaskManager = new AnimationTaskManager();
