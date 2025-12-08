@@ -1,8 +1,6 @@
 package cheesepaste.blocktasy.component;
 
 import cheesepaste.blocktasy.entity.BaseBlockEntity;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.nbt.NbtCompound;
 
@@ -13,7 +11,7 @@ public abstract class  EntityComponents {
         this.parent=parent;
     }
 
-    public abstract void tick();
+    public abstract boolean tick();
     public abstract void initDT(DataTracker.Builder builder);
     public abstract void readNBT(NbtCompound nbt);
     public abstract void writeNBT(NbtCompound nbt);

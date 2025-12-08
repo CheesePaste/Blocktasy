@@ -20,7 +20,7 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.function.Function;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * 基础方块实体类
@@ -134,9 +134,15 @@ public abstract class BaseBlockEntity extends LivingEntity {
     @Override
     public void tick() {
         super.tick();
-        Components.forEach((a,b)->{
-            b.tick();
-        });
+        boolean flag= false;
+        for(var i:Components.keySet()){
+            if(!flag){
+                flag=Components.get(i).tick();
+            }
+        }
+        if(flag){
+            return;
+        }
 
         this.age++;
 

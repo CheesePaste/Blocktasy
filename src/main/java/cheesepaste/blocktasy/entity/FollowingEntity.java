@@ -1,6 +1,8 @@
 package cheesepaste.blocktasy.entity;
 
 import cheesepaste.blocktasy.ability.BlockAbility;
+import cheesepaste.blocktasy.component.ControlableComponent;
+import cheesepaste.blocktasy.component.TargetableComponent;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -35,7 +37,7 @@ import java.util.UUID;
 public class FollowingEntity extends BaseBlockEntity {
 
     // 配置参数
-    private static final float CLOSE_DISTANCE = 2.0f;
+
     private static final float HORIZONTAL_SPEED = 0.15f;
     private static final float JUMP_STRENGTH = 0.5f;
     private static final int JUMP_COOLDOWN = 20;
@@ -64,11 +66,11 @@ public class FollowingEntity extends BaseBlockEntity {
 
     // 状态字段
     @Nullable
-    private Entity target;
-    private int jumpTimer = 0;
-    private boolean shouldJump = false;
+    //private Entity target;
+//    private int jumpTimer = 0;
+//    private boolean shouldJump = false;
     private int targetLostCounter = 0;
-    private static final int MAX_TARGET_LOST_TICKS = 200; // 10秒后放弃跟随
+    //private static final int MAX_TARGET_LOST_TICKS = 200; // 10秒后放弃跟随
 
     // 操纵模式状态
     @Nullable
@@ -83,6 +85,8 @@ public class FollowingEntity extends BaseBlockEntity {
     private int launchCooldown = 0; // 发射冷却
 
     public BlockAbility ability;
+    private boolean shouldJump;
+    private int jumpTimer;
 
     // ================= 构造方法 =================
 
@@ -109,13 +113,15 @@ public class FollowingEntity extends BaseBlockEntity {
     public FollowingEntity(EntityType<? extends BaseBlockEntity> type, World world, @Nullable Entity target,
                            @NotNull BlockPos pos, @NotNull BlockState state) {
         super(type, world, pos, state);
-        this.target = target;
+        //this.target = target;
         Colli();
         this.MAX_TRAIL_LENGTH = 200;
         this.targetControlPos = this.getPos();
 
         // 初始化旋转
         this.prevRenderYaw = 0;
+        this.Components.put(TargetableComponent.class,new TargetableComponent(this));
+        this.Components.put(ControlableComponent.class,new ControlableComponent(this));
     }
 
     public static DefaultAttributeContainer.Builder createFollowingAttributes() {
@@ -138,6 +144,8 @@ public class FollowingEntity extends BaseBlockEntity {
 
         // 初始化旋转
         this.prevRenderYaw = 0;
+        this.Components.put(TargetableComponent.class,new TargetableComponent(this));
+        this.Components.put(ControlableComponent.class,new ControlableComponent(this));
     }
 
     // ================= 数据跟踪 =================
@@ -145,112 +153,112 @@ public class FollowingEntity extends BaseBlockEntity {
     @Override
     protected void initDataTracker(DataTracker.Builder builder) {
         super.initDataTracker(builder);
-        builder.add(TARGET_UUID, Optional.empty());
+
         builder.add(TARGET_YAW, 0f);
         builder.add(CURRENT_YAW, 0f);
-        builder.add(IS_CONTROLLED, false);
-        builder.add(CONTROLLING_PLAYER_UUID, Optional.empty());
+
+
 
     }
 
     // ================= 目标管理 =================
 
-    public void setTarget(@Nullable Entity target) {
-        Entity oldTarget = this.target;
-        this.target = target;
+//    public void setTarget(@Nullable Entity target) {
+//        Entity oldTarget = this.target;
+//        this.target = target;
+//
+//        if (target != null) {
+//            this.dataTracker.set(TARGET_UUID, Optional.of(target.getUuid()));
+//            targetLostCounter = 0;
+//        } else {
+//            this.dataTracker.set(TARGET_UUID, Optional.empty());
+//        }
+//    }
 
-        if (target != null) {
-            this.dataTracker.set(TARGET_UUID, Optional.of(target.getUuid()));
-            targetLostCounter = 0;
-        } else {
-            this.dataTracker.set(TARGET_UUID, Optional.empty());
-        }
-    }
+//    @Nullable
+//    public Entity getTarget() {
+//        return target;
+//    }
 
-    @Nullable
-    public Entity getTarget() {
-        return target;
-    }
-
-    private void refreshTarget() {
-        Optional<UUID> uuid = this.dataTracker.get(TARGET_UUID);
-
-        if (uuid.isPresent()) {
-            Entity entity = this.getWorld().getPlayerByUuid(uuid.get());
-            if (entity == null) {
-                // 如果不是玩家，尝试查找其他实体
-                for (Entity e : this.getWorld().getPlayers()) {
-                    if (e.getUuid().equals(uuid.get())) {
-                        entity = e;
-                        break;
-                    }
-                }
-            }
-
-            if (entity != null && entity.isAlive()) {
-                this.target = entity;
-                targetLostCounter = 0;
-            } else {
-                targetLostCounter++;
-                if (targetLostCounter > MAX_TARGET_LOST_TICKS) {
-                    this.target = null;
-                    this.dataTracker.set(TARGET_UUID, Optional.empty());
-                }
-            }
-        }
-    }
+//    private void refreshTarget() {
+//        Optional<UUID> uuid = this.dataTracker.get(TARGET_UUID);
+//
+//        if (uuid.isPresent()) {
+//            Entity entity = this.getWorld().getPlayerByUuid(uuid.get());
+//            if (entity == null) {
+//                // 如果不是玩家，尝试查找其他实体
+//                for (Entity e : this.getWorld().getPlayers()) {
+//                    if (e.getUuid().equals(uuid.get())) {
+//                        entity = e;
+//                        break;
+//                    }
+//                }
+//            }
+//
+//            if (entity != null && entity.isAlive()) {
+//                this.target = entity;
+//                targetLostCounter = 0;
+//            } else {
+//                targetLostCounter++;
+//                if (targetLostCounter > MAX_TARGET_LOST_TICKS) {
+//                    this.target = null;
+//                    this.dataTracker.set(TARGET_UUID, Optional.empty());
+//                }
+//            }
+//        }
+//    }
 
     // ================= 操纵模式管理 =================
 
-    public void setControllingPlayer(@Nullable PlayerEntity player) {
-        if (player != null) {
-            this.controllingPlayerId = player.getUuid();
-            this.dataTracker.set(CONTROLLING_PLAYER_UUID, Optional.of(player.getUuid()));
-            this.dataTracker.set(IS_CONTROLLED, true);
-
-            // 启用发光效果
-            setGlowing(true);
-
-            // 在操纵模式下，取消跟随目标
-            this.setTarget(null);
-
-            // 设置无重力，便于操纵
-            this.setNoGravity(true);
-
-            // 初始位置：玩家面前一定距离
-            Vec3d lookDirection = player.getRotationVec(1.0F);
-            Vec3d eyePos = player.getEyePos();
-            this.targetControlPos = eyePos.add(lookDirection.multiply(CONTROL_DISTANCE));
-
-            // 平滑移动到目标位置
-            Vec3d toTarget = targetControlPos.subtract(this.getPos());
-            double distance = toTarget.length();
-            if (distance > 0.1) {
-                Vec3d velocity = toTarget.normalize().multiply(CONTROL_SPEED);
-                this.setVelocity(velocity);
-            } else {
-                this.setVelocity(Vec3d.ZERO);
-            }
-
-            // 清除发射状态
-            justLaunched = false;
-            launchCooldown = 0;
-
-        } else {
-            this.controllingPlayerId = null;
-            this.dataTracker.set(CONTROLLING_PLAYER_UUID, Optional.empty());
-            this.dataTracker.set(IS_CONTROLLED, false);
-
-            // 取消发光效果
-            setGlowing(false);
-
-            // 恢复重力
-            this.setNoGravity(false);
-
-            // 重置控制目标位置
-            this.targetControlPos = this.getPos();
-        }
-    }
+//    public void setControllingPlayer(@Nullable PlayerEntity player) {
+//        if (player != null) {
+//            this.controllingPlayerId = player.getUuid();
+//            this.dataTracker.set(CONTROLLING_PLAYER_UUID, Optional.of(player.getUuid()));
+//            this.dataTracker.set(IS_CONTROLLED, true);
+//
+//            // 启用发光效果
+//            setGlowing(true);
+//
+//            // 在操纵模式下，取消跟随目标
+//            this.setTarget(null);
+//
+//            // 设置无重力，便于操纵
+//            this.setNoGravity(true);
+//
+//            // 初始位置：玩家面前一定距离
+//            Vec3d lookDirection = player.getRotationVec(1.0F);
+//            Vec3d eyePos = player.getEyePos();
+//            this.targetControlPos = eyePos.add(lookDirection.multiply(CONTROL_DISTANCE));
+//
+//            // 平滑移动到目标位置
+//            Vec3d toTarget = targetControlPos.subtract(this.getPos());
+//            double distance = toTarget.length();
+//            if (distance > 0.1) {
+//                Vec3d velocity = toTarget.normalize().multiply(CONTROL_SPEED);
+//                this.setVelocity(velocity);
+//            } else {
+//                this.setVelocity(Vec3d.ZERO);
+//            }
+//
+//            // 清除发射状态
+//            justLaunched = false;
+//            launchCooldown = 0;
+//
+//        } else {
+//            this.controllingPlayerId = null;
+//            this.dataTracker.set(CONTROLLING_PLAYER_UUID, Optional.empty());
+//            this.dataTracker.set(IS_CONTROLLED, false);
+//
+//            // 取消发光效果
+//            setGlowing(false);
+//
+//            // 恢复重力
+//            this.setNoGravity(false);
+//
+//            // 重置控制目标位置
+//            this.targetControlPos = this.getPos();
+//        }
+//    }
 
     public boolean isControlledBy(PlayerEntity player) {
         if (player == null || this.controllingPlayerId == null) {
@@ -273,26 +281,7 @@ public class FollowingEntity extends BaseBlockEntity {
 
     // ================= 发射功能 =================
 
-    public void launchEntity(Vec3d direction) {
-        // 计算发射速度
-        Vec3d launchVelocity = direction.multiply(LAUNCH_SPEED);
 
-        // 应用速度
-        this.setVelocity(launchVelocity);
-
-        // 标记为刚刚发射
-        justLaunched = true;
-        launchCooldown = 10; // 10 tick的冷却，防止立即被重新控制
-
-        // 取消控制
-        setControllingPlayer(null);
-
-        // 恢复重力
-        this.setNoGravity(false);
-
-        // 播放发射音效（可选）
-        // this.playSound(SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, 1.0f, 1.0f);
-    }
 
 
 
@@ -304,30 +293,20 @@ public class FollowingEntity extends BaseBlockEntity {
     public void writeCustomDataToNbt(@NotNull NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
 
-        if (this.target != null) {
-            nbt.putUuid("Target", this.target.getUuid());
-        }
+
 
         // 保存操纵状态
-        if (this.controllingPlayerId != null) {
-            nbt.putUuid("ControllingPlayer", this.controllingPlayerId);
-        }
-        nbt.putBoolean("IsControlled", this.isControlled());
+
 
 
         // 保存控制目标位置
-        if (this.targetControlPos != null) {
-            nbt.putDouble("ControlTargetX", this.targetControlPos.x);
-            nbt.putDouble("ControlTargetY", this.targetControlPos.y);
-            nbt.putDouble("ControlTargetZ", this.targetControlPos.z);
-        }
 
-        nbt.putBoolean("JustLaunched", justLaunched);
-        nbt.putInt("LaunchCooldown", launchCooldown);
+
+
 
         nbt.putInt("JumpTimer", this.jumpTimer);
         nbt.putBoolean("ShouldJump", this.shouldJump);
-        nbt.putInt("TargetLostCounter", targetLostCounter);
+
         nbt.putFloat("TargetYaw", this.dataTracker.get(TARGET_YAW));
         nbt.putFloat("CurrentYaw", this.dataTracker.get(CURRENT_YAW));
     }
@@ -336,32 +315,21 @@ public class FollowingEntity extends BaseBlockEntity {
     public void readCustomDataFromNbt(@NotNull NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
 
-        if (nbt.contains("Target", NbtElement.INT_ARRAY_TYPE)) {
-            UUID targetUuid = nbt.getUuid("Target");
-            this.dataTracker.set(TARGET_UUID, Optional.of(targetUuid));
-        }
+
 
         // 加载操纵状态
-        if (nbt.contains("ControllingPlayer", NbtElement.INT_ARRAY_TYPE)) {
-            UUID controllingPlayerUuid = nbt.getUuid("ControllingPlayer");
-            this.controllingPlayerId = controllingPlayerUuid;
-            this.dataTracker.set(CONTROLLING_PLAYER_UUID, Optional.of(controllingPlayerUuid));
+
+
+        if (nbt.contains("JumpTimer", NbtElement.INT_TYPE)) {
+            this.jumpTimer = nbt.getInt("JumpTimer");
         }
 
-        if (nbt.contains("IsControlled", NbtElement.BYTE_TYPE)) {
-            boolean isControlled = nbt.getBoolean("IsControlled");
-            this.dataTracker.set(IS_CONTROLLED, isControlled);
+        if (nbt.contains("ShouldJump", NbtElement.BYTE_TYPE)) {
+            this.shouldJump = nbt.getBoolean("ShouldJump");
         }
-
-
 
         // 加载控制目标位置
-        if (nbt.contains("ControlTargetX", NbtElement.DOUBLE_TYPE)) {
-            double x = nbt.getDouble("ControlTargetX");
-            double y = nbt.getDouble("ControlTargetY");
-            double z = nbt.getDouble("ControlTargetZ");
-            this.targetControlPos = new Vec3d(x, y, z);
-        }
+
 
         if (nbt.contains("JustLaunched", NbtElement.BYTE_TYPE)) {
             justLaunched = nbt.getBoolean("JustLaunched");
@@ -371,13 +339,7 @@ public class FollowingEntity extends BaseBlockEntity {
             launchCooldown = nbt.getInt("LaunchCooldown");
         }
 
-        if (nbt.contains("JumpTimer", NbtElement.INT_TYPE)) {
-            this.jumpTimer = nbt.getInt("JumpTimer");
-        }
 
-        if (nbt.contains("ShouldJump", NbtElement.BYTE_TYPE)) {
-            this.shouldJump = nbt.getBoolean("ShouldJump");
-        }
 
         if (nbt.contains("TargetLostCounter", NbtElement.INT_TYPE)) {
             this.targetLostCounter = nbt.getInt("TargetLostCounter");
@@ -415,75 +377,6 @@ public class FollowingEntity extends BaseBlockEntity {
     // ================= 旋转系统 =================
 
     /**
-     * 计算看向目标所需的yaw
-     */
-    private void calculateTargetRotation() {
-        if (this.target == null) {
-            return;
-        }
-
-        // 计算看向目标的方向向量
-        Vec3d toTarget = target.getPos().subtract(this.getPos());
-
-        // 只计算水平旋转角度 (Yaw)
-        double dx = toTarget.x;
-        double dz = toTarget.z;
-
-        // 计算yaw（水平旋转角度）
-        float targetYaw = (float) (Math.atan2(dz, dx) * (180.0 / Math.PI)) - 90.0f;
-
-        // 确保角度在有效范围内
-        targetYaw = MathHelper.wrapDegrees(targetYaw);
-
-        // 更新数据跟踪器
-        this.dataTracker.set(TARGET_YAW, targetYaw);
-    }
-
-    /**
-     * 平滑插值旋转到目标角度
-     */
-    private void updateRotation() {
-        if (this.target == null) {
-            return;
-        }
-
-        // 获取目标角度
-        float targetYaw = this.dataTracker.get(TARGET_YAW);
-
-        // 获取当前角度
-        float currentYaw = this.dataTracker.get(CURRENT_YAW);
-
-        // 保存之前的渲染角度用于插值
-        this.prevRenderYaw = currentYaw;
-
-        // 计算角度差，使用最短路径
-        float yawDiff = MathHelper.wrapDegrees(targetYaw - currentYaw);
-
-        // 应用旋转插值
-        float rotationStep = ROTATION_SPEED * ROTATION_INTERPOLATION_FACTOR;
-
-        // 限制最大旋转速度
-        yawDiff = MathHelper.clamp(yawDiff, -rotationStep, rotationStep);
-
-        // 应用旋转
-        float newYaw = currentYaw + yawDiff;
-
-        // 确保角度在有效范围内
-        newYaw = MathHelper.wrapDegrees(newYaw);
-
-        // 更新数据跟踪器和实体角度
-        this.dataTracker.set(CURRENT_YAW, newYaw);
-
-        // 同步到实体
-        this.setYaw(newYaw);
-        this.setHeadYaw(newYaw); // 设置头部朝向
-        this.setBodyYaw(newYaw); // 设置身体朝向
-
-        // 固定pitch为0，不抬头低头
-        this.setPitch(0f);
-    }
-
-    /**
      * 获取用于渲染的插值yaw角度
      */
     public float getRenderYaw(float tickDelta) {
@@ -497,52 +390,35 @@ public class FollowingEntity extends BaseBlockEntity {
         // 先调用父类的tick，这会更新位置、速度、重力等
         super.tick();
 
-        // 更新发射冷却
-        if (launchCooldown > 0) {
-            launchCooldown--;
-        }
+        // 更新发射冷却->组件中
 
 
 
-        // 检查控制状态
-        refreshControlState();
 
-        // 如果被控制，执行控制逻辑
-        if (isControlled()) {
-            tickControlled();
-            return;
-        }
+        // 检查控制状态->组件中
 
-        // 确保目标是最新的
-        if (this.target == null || !this.target.isAlive()) {
-            refreshTarget();
-        }
+
+        // 如果被控制，执行控制逻辑->组件
+//        if (isControlled()) {
+//            tickControlled();
+//            return;
+//        }
+
+        // 确保目标是最新的 ->移动到组件中
+
 
         // 更新旋转系统
-        if (this.target != null) {
-            calculateTargetRotation();
-            updateRotation();
-        }
+//        if (this.target != null) {
+//            calculateTargetRotation();
+//            updateRotation();
+//        }
 
-        // 如果没有目标，停止移动
-        if (this.target == null) {
-            // 只停止水平移动，不影响重力
-            Vec3d currentVel = this.getVelocity();
-            this.setVelocity(new Vec3d(0, currentVel.y, 0));
-            applyMovement();
-            this.move(MovementType.SELF, this.getVelocity());
-            return;
-        }
+        // 如果没有目标，停止移动->components
 
-        // 如果距离足够近，停止水平移动
-        if (isClose()) {
-            Vec3d currentVel = this.getVelocity();
-            this.setVelocity(new Vec3d(0, currentVel.y, 0));
-            applyMovement();
-            this.move(MovementType.SELF, this.getVelocity());
-            return;
-        }
-        processMovement();
+
+        // 如果距离足够近，停止水平移动->com
+
+        //processMovement();
 
 
     }
@@ -554,178 +430,46 @@ public class FollowingEntity extends BaseBlockEntity {
 
     // ================= 控制逻辑 =================
 
-    /**
-     * 刷新控制状态
-     */
-    private void refreshControlState() {
-        if (isControlled()) {
-            Optional<UUID> uuid = this.dataTracker.get(CONTROLLING_PLAYER_UUID);
-            if (uuid.isPresent()) {
-                PlayerEntity player = this.getWorld().getPlayerByUuid(uuid.get());
-                if (player != null && player.isAlive()) {
-                    this.controllingPlayerId = player.getUuid();
-                } else {
-                    // 玩家不存在或已死亡，取消控制
-                    setControllingPlayer(null);
-                }
-            } else {
-                setControllingPlayer(null);
-            }
-        }
-    }
+//    /**
+//     * 刷新控制状态
+//     */
+//    private void refreshControlState() {
+//        if (isControlled()) {
+//            Optional<UUID> uuid = this.dataTracker.get(CONTROLLING_PLAYER_UUID);
+//            if (uuid.isPresent()) {
+//                PlayerEntity player = this.getWorld().getPlayerByUuid(uuid.get());
+//                if (player != null && player.isAlive()) {
+//                    this.controllingPlayerId = player.getUuid();
+//                } else {
+//                    // 玩家不存在或已死亡，取消控制
+//                    setControllingPlayer(null);
+//                }
+//            } else {
+//                setControllingPlayer(null);
+//            }
+//        }
+//    }
 
-    /**
-     * 被控制时的逻辑
-     */
-    private void tickControlled() {
-        PlayerEntity controller = getControllingPlayer();
-        if (controller == null) {
-            setControllingPlayer(null);
-            return;
-        }
 
-        // 如果刚刚发射，跳过控制逻辑
-        if (justLaunched && launchCooldown > 0) {
-            return;
-        }
-
-        // 获取玩家准心指向的位置
-        Vec3d lookDirection = controller.getRotationVec(1.0F);
-        Vec3d eyePos = controller.getEyePos();
-
-        // 计算目标位置：玩家面前一定距离
-        Vec3d newTargetPos = eyePos.add(lookDirection.multiply(CONTROL_DISTANCE));
-
-        // 平滑更新目标位置
-        Vec3d currentTargetPos = this.targetControlPos;
-        Vec3d toNewTarget = newTargetPos.subtract(currentTargetPos);
-        double distanceToNewTarget = toNewTarget.length();
-
-        if (distanceToNewTarget > 0.1) {
-            // 平滑移动目标位置
-            Vec3d smoothedToTarget = toNewTarget.multiply(CONTROL_SMOOTHING);
-            this.targetControlPos = currentTargetPos.add(smoothedToTarget);
-        } else {
-            this.targetControlPos = newTargetPos;
-        }
-
-        // 平滑移动到目标位置
-        Vec3d currentPos = this.getPos();
-        Vec3d toTarget = targetControlPos.subtract(currentPos);
-        double distance = toTarget.length();
-
-        if (distance > 0.1) {
-            // 使用平滑移动
-            double speed = Math.min(distance * CONTROL_SPEED, 1.0); // 限制最大速度
-            Vec3d velocity = toTarget.normalize().multiply(speed);
-            this.setVelocity(velocity);
-        } else {
-            this.setVelocity(Vec3d.ZERO);
-        }
-
-        // 设置实体的朝向
-        float yaw = controller.getYaw();
-        this.setYaw(yaw);
-        this.setHeadYaw(yaw);
-        this.setBodyYaw(yaw);
-
-        // 应用移动
-        this.move(MovementType.SELF, this.getVelocity());
-
-    }
 
     // ================= 粒子效果 =================
 
 
-    private void processMovement() {
-        // 更新跳跃计时器
-        if (jumpTimer > 0) {
-            jumpTimer--;
-        }
 
-        // 如果在地面上且跳跃计时器为0，准备跳跃
-        if (this.isOnGround() && jumpTimer <= 0) {
-            shouldJump = true;
-            jumpTimer = JUMP_COOLDOWN;
-        }
 
-        // 执行跳跃
-        if (shouldJump && isOnGround()) {
-            jumpTowardTarget();
-            shouldJump = false;
-        }
 
-        // 应用水平移动
-        Vec3d horizontalDir = getHorizontalDirection();
-        if (horizontalDir != null) {
-            applyHorizontalMovement(horizontalDir);
-        }
-
-        // 应用速度和限制
-        applyMovement();
-    }
-
-    private void jumpTowardTarget() {
-        Vec3d direction = getHorizontalDirection();
-        if (direction == null) return;
-
-        // 计算跳跃力量（根据距离调整）
-        float jumpMultiplier = 1.0f;
-
-        this.setVelocity(
-                direction.x * HORIZONTAL_SPEED * 2.0f * jumpMultiplier,
-                JUMP_STRENGTH * jumpMultiplier + this.getVelocity().y,
-                direction.z * HORIZONTAL_SPEED * 2.0f * jumpMultiplier
-        );
-    }
 
     @Override
     protected double getGravity() {
         return 0.08;
     }
 
-    @Nullable
-    private Vec3d getHorizontalDirection() {
-        if (target == null) return null;
 
-        Vec3d toTarget = target.getPos().subtract(this.getPos());
-        Vec3d horizontal = new Vec3d(toTarget.x, 0, toTarget.z);
-
-        if (horizontal.lengthSquared() < 0.001) {
-            return null;
-        }
-
-        return horizontal.normalize();
-    }
-
-    private void applyHorizontalMovement(@NotNull Vec3d direction) {
-        Vec3d horizontalVelocity = direction.multiply(HORIZONTAL_SPEED);
-        this.setVelocity(new Vec3d(
-                horizontalVelocity.x,
-                this.getVelocity().y,
-                horizontalVelocity.z
-        ));
-
-        // 应用移动
-        this.move(MovementType.SELF, this.getVelocity());
-    }
-
-    private void applyMovement() {
-        double e = this.getVelocity().y;
-        e -= this.getFinalGravity();
-
-        this.setVelocity(this.getVelocity().x, e * (double)0.98F, this.getVelocity().z);
-    }
 
     // ================= Targetable接口实现 =================
 
 
-    public boolean isClose() {
-        if (target != null) {
-            return this.getPos().distanceTo(target.getPos()) <= CLOSE_DISTANCE;
-        }
-        return false;
-    }
+    //COMPONENT
 
     // ================= 其他方法 =================
 
@@ -746,12 +490,12 @@ public class FollowingEntity extends BaseBlockEntity {
         return this.isControlled(); // 被控制时无重力
     }
 
-    @Override
-    public String toString() {
-        return String.format("FollowingEntity{id=%d, pos=%s, target=%s, yaw=%.2f, controlled=%s}",
-                getId(), getPos(),
-                target != null ? target.getName().getString() : "null",
-                this.getYaw(),
-                isControlled() ? "true" : "false");
-    }
+//    @Override
+//    public String toString() {
+//        return String.format("FollowingEntity{id=%d, pos=%s, target=%s, yaw=%.2f, controlled=%s}",
+//                getId(), getPos(),
+//                target != null ? target.getName().getString() : "null",
+//                this.getYaw(),
+//                isControlled() ? "true" : "false");
+//    }
 }
