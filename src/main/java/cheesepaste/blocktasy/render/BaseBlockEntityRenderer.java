@@ -33,7 +33,7 @@ public class BaseBlockEntityRenderer extends EntityRenderer<BaseBlockEntity> {
         // 使用插值的旋转角度
         if (entity instanceof FollowingEntity entity1)
         {
-            float renderYaw = entity1.getRenderYaw(tickDelta);
+            float renderYaw = entity1.getYaw(tickDelta);
 
             // 应用旋转
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(renderYaw));

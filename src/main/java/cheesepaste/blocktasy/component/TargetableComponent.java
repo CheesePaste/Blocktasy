@@ -27,7 +27,7 @@ public class TargetableComponent extends EntityComponents{
     private static final int MAX_TARGET_LOST_TICKS = 200; // 10秒后放弃跟随
 
     private int jumpTimer = 0;
-    private boolean shouldJump = false;
+    public boolean shouldJump = false;
 
     private static final float HORIZONTAL_SPEED = 0.15f;
     private static final float JUMP_STRENGTH = 0.5f;
@@ -181,6 +181,11 @@ public class TargetableComponent extends EntityComponents{
         }
 
         nbt.putInt("TargetLostCounter", targetLostCounter);
+
+    }
+
+    @Override
+    public void OnSpawn() {
 
     }
 

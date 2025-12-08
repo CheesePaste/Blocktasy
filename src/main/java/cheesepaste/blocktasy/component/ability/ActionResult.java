@@ -1,4 +1,4 @@
-package cheesepaste.blocktasy.ability;
+package cheesepaste.blocktasy.component.ability;
 
 public enum ActionResult {
     Success,

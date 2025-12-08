@@ -1,10 +1,9 @@
 package cheesepaste.blocktasy;
 
 
-import cheesepaste.blocktasy.ability.BlockAbility;
+import cheesepaste.blocktasy.component.ability.BlockAbilityComponent;
 import cheesepaste.blocktasy.component.ModComponents;
 import cheesepaste.blocktasy.config.ModConfig;
-import cheesepaste.blocktasy.entity.BaseBlockEntity;
 import cheesepaste.blocktasy.entity.FollowingEntity;
 import cheesepaste.blocktasy.entity.ModEntities;
 import cheesepaste.blocktasy.item.IronBlockWandItem;
@@ -15,21 +14,14 @@ import me.shedaniel.autoconfig.gui.registry.GuiRegistry;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.GameRenderer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +34,7 @@ public class Blocktasy implements ModInitializer {
 
 	// 添加静态实例
 	private static Blocktasy instance;
-	public static Map<BlockState, BlockAbility> abilityMap=new HashMap<>();
+	public static Map<BlockState, BlockAbilityComponent> abilityMap=new HashMap<>();
 
 	public static ModConfig config;
 	/*private final AnimationTaskManager animationTaskManager = new AnimationTaskManager();

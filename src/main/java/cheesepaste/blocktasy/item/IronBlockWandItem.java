@@ -1,7 +1,9 @@
 package cheesepaste.blocktasy.item;
 
 import cheesepaste.blocktasy.Blocktasy;
+import cheesepaste.blocktasy.component.ControlableComponent;
 import cheesepaste.blocktasy.component.ModComponents;
+import cheesepaste.blocktasy.component.TargetableComponent;
 import cheesepaste.blocktasy.component.WandModeComponent;
 import cheesepaste.blocktasy.entity.FollowingEntity;
 import cheesepaste.blocktasy.entity.ModEntities;
@@ -188,8 +190,11 @@ public class IronBlockWandItem extends Item {
     private void createFollowingEntity(World world, PlayerEntity player, BlockPos pos, BlockState state) {
         if (world.isClient()) return;
 
-        FollowingEntity entity = new FollowingEntity(ModEntities.FollowingEntity, world, player, pos, state);
-        entity.setTarget(player); // 设置跟随目标
+        FollowingEntity entity = new FollowingEntity(ModEntities.FollowingEntity, world,pos, state);
+        if(entity.Components.get(TargetableComponent.class) instanceof TargetableComponent targetableComponent)
+        {
+            targetableComponent.setTarget(player);
+        }
 
         // 设置实体位置为中心点
         entity.setPosition(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
@@ -213,7 +218,7 @@ public class IronBlockWandItem extends Item {
     private void createStaticEntity(World world, PlayerEntity player, BlockPos pos, BlockState state) {
         if (world.isClient()) return;
 
-        FollowingEntity entity = new FollowingEntity(ModEntities.FollowingEntity, world, null, pos, state);
+        FollowingEntity entity = new FollowingEntity(ModEntities.FollowingEntity, world, pos, state);
         // 不设置目标，实体将保持静止
         entity.setVelocity(0, 0, 0);
 
@@ -270,13 +275,16 @@ public class IronBlockWandItem extends Item {
     private void handleControlModeLaunch(World world, PlayerEntity player, Hand hand, ItemStack stack) {
         // 查找玩家当前是否正在操纵实体
         FollowingEntity controlledEntity = findControlledEntity(world, player);
+        if(controlledEntity==null)
+        {
+            return;
+        }
+        ControlableComponent controlableComponent= (ControlableComponent) controlledEntity.Components.get(ControlableComponent.class);
 
-        if (controlledEntity != null && controlledEntity.isControlled()) {
+        if (controlableComponent.isControlled()) {
             // 获取玩家视角方向
             Vec3d lookDirection = player.getRotationVec(1.0F);
-
-            // 发射实体
-            controlledEntity.launchEntity(lookDirection);
+            controlableComponent.launchEntity(lookDirection);
             player.swingHand(hand, true);
             player.sendMessage(Text.literal("实体已发射").formatted(Formatting.GREEN), true);
         } else {
@@ -315,13 +323,19 @@ public class IronBlockWandItem extends Item {
         switch (mode) {
             case FOLLOW:
                 // 模式1：设置跟随玩家
-                followingEntity.setTarget(player);
+                if(followingEntity.Components.get(TargetableComponent.class) instanceof TargetableComponent targetableComponent)
+                {
+                    targetableComponent.setTarget(player);
+                }
                 player.sendMessage(Text.literal("方块开始跟随你").formatted(Formatting.GREEN), true);
                 break;
 
             case STATIC:
                 // 模式2：取消跟随，保持静止
-                followingEntity.setTarget(null);
+                if(followingEntity.Components.get(TargetableComponent.class) instanceof TargetableComponent targetableComponent)
+                {
+                    targetableComponent.setTarget(null);
+                }
                 followingEntity.setVelocity(0, 0, 0);
                 player.sendMessage(Text.literal("方块已静止").formatted(Formatting.YELLOW), true);
                 break;
@@ -339,7 +353,7 @@ public class IronBlockWandItem extends Item {
 
             case CONTROL:
                 // 模式4：操纵模式 - 选中/发射/取消选中实体
-                handleControlModeSelect(world, player, followingEntity, hand);
+                handleControlModeSelect(world, player, followingEntity);
                 break;
         }
 
@@ -352,16 +366,20 @@ public class IronBlockWandItem extends Item {
     /**
      * 处理操纵模式的选中/发射/取消选中
      */
-    private void handleControlModeSelect(World world, PlayerEntity player, FollowingEntity entity, Hand hand) {
+    private void handleControlModeSelect(World world, PlayerEntity player, FollowingEntity entity) {
+        if(entity==null)
+        {
+            return;
+        }
+        ControlableComponent controlableComponent= (ControlableComponent) entity.Components.get(ControlableComponent.class);
         // 检查实体是否已经被控制
-        if (entity.isControlled()) {
+        if (controlableComponent.isControlled()) {
             // 如果已经被这个玩家控制，发射它
-            if (entity.isControlledBy(player)) {
+            if (controlableComponent.isControlledBy(player)) {
                 // 获取玩家视角方向
                 Vec3d lookDirection = player.getRotationVec(1.0F);
 
-                // 发射实体
-                entity.launchEntity(lookDirection);
+                controlableComponent.launchEntity(lookDirection);
                 player.sendMessage(Text.literal("实体已发射").formatted(Formatting.GREEN), true);
             } else {
                 // 被其他玩家控制，不能操作
@@ -372,13 +390,17 @@ public class IronBlockWandItem extends Item {
 
             // 首先取消对当前控制的实体的控制
             FollowingEntity currentlyControlled = findControlledEntity(world, player);
-            if (currentlyControlled != null && currentlyControlled.isControlledBy(player)) {
-                currentlyControlled.setControllingPlayer(null);
+            if(currentlyControlled==null)
+            {
+                return;
+            }
+            ControlableComponent controlableComponent1= (ControlableComponent) currentlyControlled.Components.get(ControlableComponent.class);
+            if (controlableComponent1.isControlledBy(player)) {
+                    controlableComponent1.setControllingPlayer(null);
                 player.sendMessage(Text.literal("已取消选中之前的实体").formatted(Formatting.YELLOW), true);
             }
 
-            // 然后控制新的实体
-            entity.setControllingPlayer(player);
+            controlableComponent1.setControllingPlayer(player);
             player.sendMessage(Text.literal("已选中实体，移动准心进行操纵，再次右键发射").formatted(Formatting.GREEN), true);
         }
     }
@@ -392,7 +414,8 @@ public class IronBlockWandItem extends Item {
                 player.getBoundingBox().expand(100), // 搜索100格范围内
                 e -> e instanceof FollowingEntity)) {
             FollowingEntity followingEntity = (FollowingEntity) entity;
-            if (followingEntity.isControlledBy(player)) {
+            ControlableComponent controlableComponent= (ControlableComponent) followingEntity.Components.get(ControlableComponent.class);
+            if (controlableComponent.isControlledBy(player)) {
                 return followingEntity;
             }
         }
