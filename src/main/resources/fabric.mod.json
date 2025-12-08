@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "blocktasy",
+	"version": "${version}",
+	"name": "Blocktasy",
+	"description": "This is an example description! Tell everyone what your mod is about!",
+	"authors": [
+		"Me!"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/blocktasy/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"cheesepaste.blocktasy.Blocktasy"
+		],
+		"fabric-datagen": [
+			"cheesepaste.blocktasy.BlocktasyDataGenerator"
+		]
+	},
+	"mixins": [
+		"blocktasy.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.18.1",
+		"minecraft": "~1.21.1",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
