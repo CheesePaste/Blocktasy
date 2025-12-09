@@ -28,6 +28,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class BaseBlockEntity extends LivingEntity {
 
+
+
     // 常量
     protected int MAX_TRAIL_LENGTH = 25;
     public static final TrackedData<Integer> BLOCK_STATE_ID =
@@ -38,7 +40,7 @@ public abstract class BaseBlockEntity extends LivingEntity {
     protected final List<Vec3d> trailPositions = new ArrayList<>();
     private int debugTickCounter = 0;
     private static final int DEBUG_LOG_INTERVAL = 100; // 每100 tick记录一次调试信息
-    public Map<Class<?extends EntityComponents>,EntityComponents> Components=new HashMap<>();
+    public static Map<Class<?extends EntityComponents>,EntityComponents> Components=new HashMap<>();
 
     // ================= 构造方法 =================
 
@@ -64,12 +66,13 @@ public abstract class BaseBlockEntity extends LivingEntity {
 
     @Override
     protected void initDataTracker(DataTracker.Builder builder) {
-
-        Components.forEach((a,b)->{
-            b.initDT(builder);
-        });
-        builder.add(BLOCK_STATE_ID, 0);
         super.initDataTracker(builder);
+        builder.add(BLOCK_STATE_ID, 0);
+        for (var entry : Components.entrySet()){
+            entry.getValue().initDT(builder);
+        }
+
+
     }
 
     // ================= 方块状态管理 =================

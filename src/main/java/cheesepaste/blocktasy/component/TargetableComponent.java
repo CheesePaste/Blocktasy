@@ -1,5 +1,6 @@
 package cheesepaste.blocktasy.component;
 
+import cheesepaste.blocktasy.Blocktasy;
 import cheesepaste.blocktasy.entity.BaseBlockEntity;
 import cheesepaste.blocktasy.entity.FollowingEntity;
 import net.minecraft.entity.Entity;
@@ -20,8 +21,7 @@ import java.util.UUID;
 
 public class TargetableComponent extends EntityComponents{
     private Entity target;
-    private static final TrackedData<Optional<UUID>> TARGET_UUID =
-            DataTracker.registerData(FollowingEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
+    private TrackedData<Optional<UUID>> TARGET_UUID=null;
     int targetLostCounter=0;
     private static final float CLOSE_DISTANCE = 2.0f;
     private static final int MAX_TARGET_LOST_TICKS = 200; // 10秒后放弃跟随
@@ -37,8 +37,16 @@ public class TargetableComponent extends EntityComponents{
     private static final float ROTATION_SPEED = 10.0f; // 旋转速度（度/秒）
     private static final float ROTATION_INTERPOLATION_FACTOR = 0.2f; // 旋转插值因子
 
+    @Override
+    public void registerDataTracker(){
+        TARGET_UUID=DataTracker.registerData(FollowingEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
+    }
+
     public TargetableComponent(BaseBlockEntity parent) {
         super(parent);
+    }
+    public TargetableComponent(){
+        super(null);
     }
 
     @Override
@@ -161,6 +169,7 @@ public class TargetableComponent extends EntityComponents{
     @Override
     public void initDT(DataTracker.Builder builder) {
         builder.add(TARGET_UUID, Optional.empty());
+        Blocktasy.LOGGER.info("Target");
     }
 
     @Override

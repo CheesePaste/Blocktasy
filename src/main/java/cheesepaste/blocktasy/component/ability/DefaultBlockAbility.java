@@ -12,6 +12,9 @@ public class DefaultBlockAbility extends BlockAbilityComponent{
     public DefaultBlockAbility(BaseBlockEntity baseBlockEntity) {
         super(baseBlockEntity);
     }
+    public DefaultBlockAbility(){
+        super(null);
+    }
 
     @Override
     public void OnSpawn() {
@@ -21,6 +24,11 @@ public class DefaultBlockAbility extends BlockAbilityComponent{
             parent.Components.replace(BlockAbilityComponent.class,ability);
             ability.OnSpawn();
         }
+    }
+
+    @Override
+    public void registerDataTracker() {
+
     }
 
     @Override

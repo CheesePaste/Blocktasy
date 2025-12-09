@@ -23,6 +23,14 @@ import java.util.HashMap;
 
 public class FollowingEntity extends BaseBlockEntity {
 
+
+    static {
+        initializeComponents();
+        Components.forEach((k,v)->{
+            v.registerDataTracker();
+        });
+    }
+
     void InitCollider() {
         enableCollision = true;
         attackable = false;
@@ -48,7 +56,9 @@ public class FollowingEntity extends BaseBlockEntity {
         super(type, world, pos, state);
         InitCollider();
         this.MAX_TRAIL_LENGTH = 200;
-
+        Components.forEach((k,v)->{
+            v.setParent(this);
+        });
         OnSpawn();
     }
 
@@ -68,16 +78,18 @@ public class FollowingEntity extends BaseBlockEntity {
         this.setNoGravity(false);
         InitCollider();
         this.MAX_TRAIL_LENGTH = 200;
-
+        Components.forEach((k,v)->{
+            v.setParent(this);
+        });
         OnSpawn();
     }
 
-    private void initializeComponents(DataTracker.Builder builder) {
-        this.Components=new HashMap<>();
+    private static void initializeComponents() {
+        Components=new HashMap<>();
 
-        this.Components.put(TargetableComponent.class, new TargetableComponent(this));
-        this.Components.put(ControlableComponent.class, new ControlableComponent(this) );
-        this.Components.put(BlockAbilityComponent.class, new DefaultBlockAbility(this));
+        Components.put(TargetableComponent.class, new TargetableComponent());
+        Components.put(ControlableComponent.class, new ControlableComponent() );
+        Components.put(BlockAbilityComponent.class, new DefaultBlockAbility());
 //        for(EntityComponents components : Components.values())
 //        {
 //            components.initDT(builder);
@@ -94,7 +106,7 @@ public class FollowingEntity extends BaseBlockEntity {
     @Override
     protected void initDataTracker(DataTracker.Builder builder) {
 
-        initializeComponents(builder);
+
         super.initDataTracker(builder);
     }
 

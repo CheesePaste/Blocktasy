@@ -14,9 +14,14 @@ public abstract class  EntityComponents {
     private EntityComponents() {
     }
 
+    public void setParent(BaseBlockEntity parent) {
+        this.parent = parent;
+    }
+
     public abstract boolean tick();
     public abstract void initDT(DataTracker.Builder builder);
     public abstract void readNBT(NbtCompound nbt);
     public abstract void writeNBT(NbtCompound nbt);
     public abstract void OnSpawn();
+    public abstract void registerDataTracker();
 }

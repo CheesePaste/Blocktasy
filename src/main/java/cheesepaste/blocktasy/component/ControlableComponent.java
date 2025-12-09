@@ -1,5 +1,6 @@
 package cheesepaste.blocktasy.component;
 
+import cheesepaste.blocktasy.Blocktasy;
 import cheesepaste.blocktasy.entity.BaseBlockEntity;
 import cheesepaste.blocktasy.entity.FollowingEntity;
 import net.minecraft.entity.MovementType;
@@ -28,14 +29,17 @@ public class ControlableComponent extends EntityComponents {
     private static final float CONTROL_SMOOTHING = 0.2f;
 
     // 数据跟踪器
-    private static final TrackedData<Boolean> IS_CONTROLLED =
-            DataTracker.registerData(FollowingEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
-    private static final TrackedData<Optional<UUID>> CONTROLLING_PLAYER_UUID =
-            DataTracker.registerData(FollowingEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
+    private TrackedData<Boolean> IS_CONTROLLED;
+
+    private TrackedData<Optional<UUID>> CONTROLLING_PLAYER_UUID;
+
 
     public ControlableComponent(BaseBlockEntity parent) {
         super(parent);
         this.targetControlPos = parent.getPos();
+    }
+    public ControlableComponent(){
+        super(null);
     }
 
     // ================= 公共方法 =================
@@ -153,6 +157,7 @@ public class ControlableComponent extends EntityComponents {
     public void initDT(DataTracker.Builder builder) {
         builder.add(IS_CONTROLLED, false);
         builder.add(CONTROLLING_PLAYER_UUID, Optional.empty());
+        Blocktasy.LOGGER.info("Control");
     }
 
     @Override
@@ -203,6 +208,12 @@ public class ControlableComponent extends EntityComponents {
     @Override
     public void OnSpawn() {
 
+    }
+
+    @Override
+    public void registerDataTracker() {
+        IS_CONTROLLED=DataTracker.registerData(FollowingEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+        CONTROLLING_PLAYER_UUID= DataTracker.registerData(FollowingEntity.class, TrackedDataHandlerRegistry.OPTIONAL_UUID);
     }
 
     // ================= 私有方法 =================
