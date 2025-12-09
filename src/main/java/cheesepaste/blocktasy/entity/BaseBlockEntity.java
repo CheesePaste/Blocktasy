@@ -46,7 +46,7 @@ public abstract class BaseBlockEntity extends LivingEntity {
 
     protected BaseBlockEntity(EntityType<? extends LivingEntity> type, World world) {
         super(type, world);
-        Components=new HashMap<>();
+
         //.info("BaseBlockEntity created with default constructor");
     }
 
@@ -58,8 +58,7 @@ public abstract class BaseBlockEntity extends LivingEntity {
         this(type, world);
         this.setBlockState(blockState);
         this.setPosition(Vec3d.ofCenter(pos));
-        this.setNoGravity(false);  // 确保重力启用
-        Components=new HashMap<>();
+        this.setNoGravity(false);
     }
 
     // ================= 数据跟踪 =================
