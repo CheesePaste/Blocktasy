@@ -93,8 +93,9 @@ public class FollowingEntity extends BaseBlockEntity {
 
     @Override
     protected void initDataTracker(DataTracker.Builder builder) {
-        super.initDataTracker(builder);
+
         initializeComponents(builder);
+        super.initDataTracker(builder);
     }
 
     @Override
