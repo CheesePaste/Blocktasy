@@ -392,6 +392,8 @@ public class IronBlockWandItem extends Item {
             FollowingEntity currentlyControlled = findControlledEntity(world, player);
             if(currentlyControlled==null)
             {
+                controlableComponent.setControllingPlayer(player);
+                player.sendMessage(Text.literal("已选中实体，移动准心进行操纵，再次右键发射").formatted(Formatting.GREEN), true);
                 return;
             }
             ControlableComponent controlableComponent1= (ControlableComponent) currentlyControlled.Components.get(ControlableComponent.class);

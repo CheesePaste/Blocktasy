@@ -117,8 +117,6 @@ public class FollowingEntity extends BaseBlockEntity {
         builder.add(TARGET_UUID, Optional.empty());
         builder.add(IS_CONTROLLED, false);
         builder.add(CONTROLLING_PLAYER_UUID, Optional.empty());
-
-
         initializeComponents();
         super.initDataTracker(builder);
     }
