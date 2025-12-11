@@ -5,6 +5,7 @@ import cheesepaste.blocktasy.component.ControlableComponent;
 import cheesepaste.blocktasy.component.ModComponents;
 import cheesepaste.blocktasy.component.TargetableComponent;
 import cheesepaste.blocktasy.component.WandModeComponent;
+import cheesepaste.blocktasy.entity.BaseBlockEntity;
 import cheesepaste.blocktasy.entity.FollowingEntity;
 import cheesepaste.blocktasy.entity.ModEntities;
 import net.minecraft.block.BlockState;
@@ -24,6 +25,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -255,6 +257,7 @@ public class IronBlockWandItem extends Item {
         ItemStack stack = user.getStackInHand(hand);
 
         if (world.isClient()) {
+            //handleControlModeLaunch(world, user, hand, stack);
             return TypedActionResult.success(stack);
         }
 
@@ -281,10 +284,20 @@ public class IronBlockWandItem extends Item {
         }
         ControlableComponent controlableComponent= (ControlableComponent) controlledEntity.Components.get(ControlableComponent.class);
 
+
         if (controlableComponent.isControlled()) {
+
+            if(controlledEntity.Components.get(TargetableComponent.class) instanceof TargetableComponent t){
+                t.setTarget(null);
+            }
+
             // 获取玩家视角方向
             Vec3d lookDirection = player.getRotationVec(1.0F);
-            controlableComponent.launchEntity(lookDirection);
+            if(controlledEntity instanceof BaseBlockEntity b){
+                b.Components=new HashMap<>();
+                b.setVelocity(0,0,0);
+            }
+            //controlableComponent.launchEntity(lookDirection);
             player.swingHand(hand, true);
             player.sendMessage(Text.literal("实体已发射").formatted(Formatting.GREEN), true);
         } else {
@@ -297,6 +310,7 @@ public class IronBlockWandItem extends Item {
     public ActionResult useOnEntity(ItemStack stack, PlayerEntity user, LivingEntity entity, Hand hand) {
         if (user.getWorld().isClient()) {
             onRightClickEntityClient(user, hand);
+            onRightClickEntityServer(user.getWorld(), user, hand, entity, stack);
             return ActionResult.SUCCESS;
         }
 
@@ -378,8 +392,12 @@ public class IronBlockWandItem extends Item {
             if (controlableComponent.isControlledBy(player)) {
                 // 获取玩家视角方向
                 Vec3d lookDirection = player.getRotationVec(1.0F);
-
+                if(entity.Components.get(TargetableComponent.class) instanceof TargetableComponent t){
+                    t.setTarget(null);
+                }
+                entity.setVelocity(0,0,0);
                 controlableComponent.launchEntity(lookDirection);
+                entity.Components.remove(TargetableComponent.class);
                 player.sendMessage(Text.literal("实体已发射").formatted(Formatting.GREEN), true);
             } else {
                 // 被其他玩家控制，不能操作

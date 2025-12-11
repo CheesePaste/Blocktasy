@@ -23,7 +23,7 @@ public class ControlableComponent extends EntityComponents {
     private int launchCooldown = 0;
 
     // 操纵模式参数
-    private static final float LAUNCH_SPEED = 20.0f;
+    private static final float LAUNCH_SPEED = 10.0f;
     private static final float CONTROL_DISTANCE = 5.0f;
     private static final float CONTROL_SPEED = 0.3f;
     private static final float CONTROL_SMOOTHING = 0.2f;
@@ -58,6 +58,7 @@ public class ControlableComponent extends EntityComponents {
         // 取消控制
         setControllingPlayer(null);
         parent.setNoGravity(false);
+
     }
 
     /**

@@ -60,10 +60,10 @@ public class TargetableComponent extends EntityComponents{
 
         if (this.target == null) {
             // 只停止水平移动，不影响重力
-            Vec3d currentVel = parent.getVelocity();
-            parent.setVelocity(new Vec3d(0, currentVel.y, 0));
-            applyMovement();
-            parent.move(MovementType.SELF, parent.getVelocity());
+//            Vec3d currentVel = parent.getVelocity();
+//            parent.setVelocity(new Vec3d(0, currentVel.y, 0));
+//            applyMovement();
+//            parent.move(MovementType.SELF, parent.getVelocity());
             return true;
         }
 
@@ -217,7 +217,7 @@ public class TargetableComponent extends EntityComponents{
         if (uuid.isPresent()) {
             Entity entity = parent.getWorld().getPlayerByUuid(uuid.get());
             if (entity == null) {
-                // 如果不是玩家，尝试查找其他实体
+//                // 如果不是玩家，尝试查找其他实体
                 for (Entity e : parent.getWorld().getPlayers()) {
                     if (e.getUuid().equals(uuid.get())) {
                         entity = e;
