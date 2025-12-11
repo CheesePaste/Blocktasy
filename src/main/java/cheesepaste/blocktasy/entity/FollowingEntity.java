@@ -5,7 +5,6 @@ import cheesepaste.blocktasy.component.EntityComponents;
 import cheesepaste.blocktasy.component.TargetableComponent;
 import cheesepaste.blocktasy.component.ability.BlockAbilityComponent;
 import cheesepaste.blocktasy.component.ability.DefaultBlockAbility;
-import com.llamalad7.mixinextras.lib.antlr.runtime.misc.FlexibleHashMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
@@ -67,6 +66,7 @@ public class FollowingEntity extends BaseBlockEntity {
 //        Components.forEach((k,v)->{
 //            v.setParent(this);
 //        });
+        initializeComponents();
         OnSpawn();
     }
 
@@ -89,6 +89,7 @@ public class FollowingEntity extends BaseBlockEntity {
 //        Components.forEach((k,v)->{
 //            v.setParent(this);
 //        });
+        initializeComponents();
         OnSpawn();
     }
 
@@ -117,7 +118,6 @@ public class FollowingEntity extends BaseBlockEntity {
         builder.add(TARGET_UUID, Optional.empty());
         builder.add(IS_CONTROLLED, false);
         builder.add(CONTROLLING_PLAYER_UUID, Optional.empty());
-        initializeComponents();
         super.initDataTracker(builder);
     }
 

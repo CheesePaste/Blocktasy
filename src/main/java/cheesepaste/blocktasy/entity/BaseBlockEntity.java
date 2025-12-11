@@ -40,7 +40,7 @@ public abstract class BaseBlockEntity extends LivingEntity {
     protected final List<Vec3d> trailPositions = new ArrayList<>();
     private int debugTickCounter = 0;
     private static final int DEBUG_LOG_INTERVAL = 100; // 每100 tick记录一次调试信息
-    public static Map<Class<?extends EntityComponents>,EntityComponents> Components=new HashMap<>();
+    public Map<Class<?extends EntityComponents>,EntityComponents> Components=new HashMap<>();
 
     // ================= 构造方法 =================
 
