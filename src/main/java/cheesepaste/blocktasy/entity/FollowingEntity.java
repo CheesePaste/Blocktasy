@@ -1,5 +1,6 @@
 package cheesepaste.blocktasy.entity;
 
+import cheesepaste.blocktasy.Blocktasy;
 import cheesepaste.blocktasy.component.ControlableComponent;
 import cheesepaste.blocktasy.component.EntityComponents;
 import cheesepaste.blocktasy.component.TargetableComponent;
@@ -62,7 +63,7 @@ public class FollowingEntity extends BaseBlockEntity {
                            @NotNull BlockPos pos, @NotNull BlockState state) {
         super(type, world, pos, state);
         InitCollider();
-        this.MAX_TRAIL_LENGTH = 200;
+        this.MAX_TRAIL_LENGTH = Blocktasy.config.TrailLength;
 //        Components.forEach((k,v)->{
 //            v.setParent(this);
 //        });
@@ -85,7 +86,7 @@ public class FollowingEntity extends BaseBlockEntity {
         super(type, world);
         this.setNoGravity(false);
         InitCollider();
-        this.MAX_TRAIL_LENGTH = 200;
+        this.MAX_TRAIL_LENGTH = Blocktasy.config.TrailLength;
 //        Components.forEach((k,v)->{
 //            v.setParent(this);
 //        });

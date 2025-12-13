@@ -160,7 +160,7 @@ public class BaseBlockEntityRenderer extends EntityRenderer<BaseBlockEntity> {
         // --- 开始渲染颜文字 ---
 
         // 定义你要渲染的颜文字
-        String kaomoji = "(❁´◡`❁))";
+        String kaomoji = Blocktasy.config.kaomoji;
         Text text = Text.of(kaomoji);
 
         // 2. 压入矩阵栈，隔离变换，防止影响后续渲染
@@ -169,8 +169,10 @@ public class BaseBlockEntityRenderer extends EntityRenderer<BaseBlockEntity> {
         // 3. 位移 (Translation)
         // 将原点移动到实体头顶上方。
         // entity.getHeight() 获取实体高度，+0.5f 是额外的悬浮距离
-        matrices.translate(0.0D, entity.getHeight() + 0.5F, 0.0D);
 
+
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-entity.getYaw()+180));
+        matrices.translate(Blocktasy.config.translate.x, entity.getHeight() + 0.5F+Blocktasy.config.translate.y, Blocktasy.config.translate.z);
         // 4. 旋转 (Rotation / Billboarding)
         // 关键步骤：让文字始终面向相机（玩家）。
         // this.dispatcher.getRotation() 获取的是当前相机的旋转四元数。
@@ -179,7 +181,7 @@ public class BaseBlockEntityRenderer extends EntityRenderer<BaseBlockEntity> {
         // 5. 缩放 (Scaling)
         // Minecraft 的字体默认非常大，通常需要缩小到 0.025 倍左右。
         // Y 轴取负值是因为 Minecraft 的文字渲染坐标系 Y 轴是向下的，而世界坐标系 Y 轴向上。
-        float scale = 0.025F;
+        float scale = Blocktasy.config.scale;
         matrices.scale(-scale, -scale, scale);
 
         // 6. 计算居中位置
@@ -188,14 +190,14 @@ public class BaseBlockEntityRenderer extends EntityRenderer<BaseBlockEntity> {
 
         // 7. 绘制文字
         Matrix4f positionMatrix = matrices.peek().getPositionMatrix();
-        positionMatrix.translate(0.5f,0,0);
+        //positionMatrix.translate((float)Blocktasy.config.translate.x, (float)Blocktasy.config.translate.y, (float)Blocktasy.config.translate.z);
 
         // 使用 TextRenderer 绘制
         this.getTextRenderer().draw(
                 text,
                 xOffset,
                 0,
-                0xFFFFFF, // 颜色 (白色)
+                Blocktasy.config.color.toInt(), // 颜色 (白色)
                 true,    // 是否有阴影 (true 会更有立体感，但颜文字通常不需要)
                 positionMatrix,
                 vertexConsumers,

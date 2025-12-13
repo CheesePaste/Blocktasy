@@ -1,5 +1,6 @@
 package cheesepaste.blocktasy.entity;
 
+import cheesepaste.blocktasy.Blocktasy;
 import cheesepaste.blocktasy.component.EntityComponents;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -31,7 +32,7 @@ public abstract class BaseBlockEntity extends LivingEntity {
 
 
     // 常量
-    protected int MAX_TRAIL_LENGTH = 25;
+    protected int MAX_TRAIL_LENGTH = Blocktasy.config.TrailLength;
     public static final TrackedData<Integer> BLOCK_STATE_ID =
             DataTracker.registerData(BaseBlockEntity.class, TrackedDataHandlerRegistry.INTEGER);
 

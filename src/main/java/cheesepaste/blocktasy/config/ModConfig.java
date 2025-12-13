@@ -8,6 +8,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,10 +49,43 @@ public class ModConfig implements ConfigData {
 
     public boolean justBreak=false;
 
+
+    @ConfigEntry.Gui.CollapsibleObject
+    public V3 translate=new V3(0f,-0.5f,-1);
+
+    public String kaomoji="(・∀・)";
+
+    public float scale=0.025f;
+
+    public int TrailLength=10;
+
+    @ConfigEntry.Gui.CollapsibleObject
+    public Color color = new Color(0xFFFFFF);
+
+    public int closeDistance=5;
+
+    public static class Color {
+        public int r = 255, g = 255, b = 255;
+
+        public Color(int hex) {
+            this.r = (hex >> 16) & 0xFF;
+            this.g = (hex >> 8) & 0xFF;
+            this.b = hex & 0xFF;
+        }
+        public Color(){}
+
+        public int toInt() {
+            return (r << 16) | (g << 8) | b;
+        }
+    }
+
     public static class V3{
         public double x=0,y=0,z=0;
         public V3(){
 
+        }
+        public V3(float x,float y,float z){
+            this.x=x;this.y=y;this.z=z;
         }
 
         public BlockPos ToBP(){

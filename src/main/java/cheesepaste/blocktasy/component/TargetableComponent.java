@@ -23,7 +23,7 @@ public class TargetableComponent extends EntityComponents{
     public Entity target;
     private TrackedData<Optional<UUID>> TARGET_UUID=null;
     int targetLostCounter=0;
-    private static final float CLOSE_DISTANCE = 2.0f;
+    private static final float CLOSE_DISTANCE = Blocktasy.config.closeDistance;
     private static final int MAX_TARGET_LOST_TICKS = 200; // 10秒后放弃跟随
 
     private int jumpTimer = 0;
